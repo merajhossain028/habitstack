@@ -1,0 +1,93 @@
+{
+  "@@locale": "en",
+  "appTitle": "HabitStack",
+  "@appTitle": {
+    "description": "Application title"
+  },
+  "welcome": "Welcome",
+  "@welcome": {
+    "description": "Welcome message"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
+  "signup": "Sign Up",
+  "@signup": {
+    "description": "Sign up button text"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  "habits": "Habits",
+  "@habits": {
+    "description": "Habits tab label"
+  },
+  "social": "Social",
+  "@social": {
+    "description": "Social tab label"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile tab label"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings page title"
+  },
+  "darkMode": "Dark Mode",
+  "@darkMode": {
+    "description": "Dark mode setting"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language setting"
+  },
+  "createHabit": "Create Habit",
+  "@createHabit": {
+    "description": "Create habit button text"
+  },
+  "habitName": "Habit Name",
+  "@habitName": {
+    "description": "Habit name field label"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button text"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit button text"
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  "noHabits": "No habits yet",
+  "@noHabits": {
+    "description": "Empty state message for habits"
+  },
+  "streakDays": "{count} day streak",
+  "@streakDays": {
+    "description": "Streak days text",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  }
+}
