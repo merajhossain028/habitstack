@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitstack/l10n/app_localizations.dart';
+import 'package:habitstack/src/api/supabase_service.dart';
+import 'package:habitstack/src/modules/auth/view/login_screen.dart';
 
 import 'config/constants.dart' show appName;
 import 'config/size.dart';
@@ -35,9 +37,19 @@ class App extends ConsumerWidget {
       theme: _themeData(context, ref),
 
       home: hasCompletedOnboardingAsync.when(
-        data: (hasCompleted) => hasCompleted
-            ? const InternetWidget(child: EntryPoint())
-            : const LandingScreen(),
+        data: (hasCompleted) {
+          if (!hasCompleted) {
+            return const LandingScreen();
+          }
+
+          // Check if authenticated
+          final user = SupabaseService.instance.currentUser;
+          if (user == null) {
+            return const LoginScreen();
+          }
+
+          return const InternetWidget(child: EntryPoint()); // Show app
+        },
         loading: () => const _LoadingScreen(),
         error: (_, __) => const LandingScreen(),
       ),
