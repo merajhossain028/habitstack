@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habitstack/src/modules/auth/view/signup_screen.dart';
 import 'package:habitstack/src/modules/onboarding/widget/gradient_bg.dart';
 
 import '../../../utils/extensions/extensions.dart';
@@ -150,9 +151,25 @@ class PermissionsScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: const Text(
-                'Allow & Continue',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              child: ElevatedButton(
+                onPressed: () async {
+                  await ref
+                      .read(permissionProvider.notifier)
+                      .requestAllRequired();
+                  await ref
+                      .read(onboardingProvider.notifier)
+                      .completeOnboarding();
+
+                  if (context.mounted) {
+                    // Go to signup instead of entry point
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SignupScreen()),
+                      (route) => false,
+                    );
+                  }
+                },
+                child: const Text('Allow & Continue'),
               ),
             ),
           ),
