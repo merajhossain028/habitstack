@@ -190,29 +190,33 @@ class _SignupForm extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = GlobalKey<FormState>();
 
+    final nameController = ref.watch(nameControllerProvider);
+    final usernameController = ref.watch(usernameControllerProvider);
+    final emailController = ref.watch(emailControllerProvider);
+    final passwordController = ref.watch(passwordControllerProvider);
+
     return Form(
       key: formKey,
       child: Column(
         children: [
           // Full Name
           AuthTextField(
+            controller: nameController,
             label: 'Full Name',
             hintText: 'Sarah Johnson',
             prefixIcon: Icons.person_outline,
             validator: FormValidators.validateName,
-            onChanged: (value) => ref.read(nameProvider.notifier).state = value,
           ),
 
           const SizedBox(height: 20),
 
           // Username
           AuthTextField(
+            controller: usernameController,
             label: 'Username',
             hintText: 'sarah_fit',
             prefixIcon: Icons.alternate_email,
             validator: FormValidators.validateUsername,
-            onChanged: (value) =>
-                ref.read(usernameProvider.notifier).state = value,
           ),
 
           const SizedBox(height: 8),
@@ -229,26 +233,24 @@ class _SignupForm extends ConsumerWidget {
 
           // Email
           AuthTextField(
+            controller: emailController,
             label: 'Email',
             hintText: 'sarah@example.com',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: FormValidators.validateEmail,
-            onChanged: (value) =>
-                ref.read(emailProvider.notifier).state = value,
           ),
 
           const SizedBox(height: 20),
 
           // Password
           AuthTextField(
+            controller: passwordController,
             label: 'Password',
             hintText: '••••••••',
             prefixIcon: Icons.lock_outline,
             obscureText: passwordVisible,
             validator: FormValidators.validatePassword,
-            onChanged: (value) =>
-                ref.read(passwordProvider.notifier).state = value,
             suffixIcon: IconButton(
               onPressed: () {
                 ref.read(passwordVisibilityProvider.notifier).state =
@@ -340,10 +342,10 @@ class _SignupForm extends ConsumerWidget {
                         await ref
                             .read(authProvider.notifier)
                             .signUp(
-                              name: ref.read(nameProvider),
-                              username: ref.read(usernameProvider),
-                              email: ref.read(emailProvider),
-                              password: ref.read(passwordProvider),
+                              name: nameController.text.trim(),
+                              username: usernameController.text.trim(),
+                              email: emailController.text.trim(),
+                              password: passwordController.text,
                             );
                       }
                     },

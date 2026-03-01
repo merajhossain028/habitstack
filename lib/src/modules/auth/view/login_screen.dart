@@ -277,6 +277,8 @@ class _LoginForm extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = GlobalKey<FormState>();
+    final emailController = ref.watch(emailControllerProvider);
+    final passwordController = ref.watch(passwordControllerProvider);
 
     return Form(
       key: formKey,
@@ -284,24 +286,24 @@ class _LoginForm extends ConsumerWidget {
         children: [
           // Email or Username
           AuthTextField(
+            controller: emailController,
             label: 'Email or Username',
             hintText: 'sarah@example.com',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: FormValidators.validateEmailOrUsername,
-            onChanged: (value) => ref.read(emailProvider.notifier).state = value,
           ),
           
           const SizedBox(height: 20),
           
           // Password
           AuthTextField(
+            controller: passwordController,
             label: 'Password',
             hintText: '••••••••',
             prefixIcon: Icons.lock_outline,
             obscureText: passwordVisible,
             validator: FormValidators.validatePassword,
-            onChanged: (value) => ref.read(passwordProvider.notifier).state = value,
             suffixIcon: IconButton(
               onPressed: () {
                 ref.read(passwordVisibilityProvider.notifier).state = !passwordVisible;
@@ -362,8 +364,8 @@ class _LoginForm extends ConsumerWidget {
                   : () async {
                       if (formKey.currentState!.validate()) {
                         await ref.read(authProvider.notifier).signIn(
-                              emailOrUsername: ref.read(emailProvider),
-                              password: ref.read(passwordProvider),
+                              emailOrUsername: emailController.text.trim(),
+                              password: passwordController.text,
                               rememberMe: rememberMe,
                             );
                       }

@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../model/auth_state.dart';
+
 import '../../../api/supabase_service.dart';
 import '../../../utils/logger/logger_helper.dart';
+import '../model/auth_state.dart';
 
 // Auth state provider
 final authProvider = NotifierProvider<AuthNotifier, AuthState>(
@@ -10,10 +12,37 @@ final authProvider = NotifierProvider<AuthNotifier, AuthState>(
 );
 
 // Form field providers
-final nameProvider = StateProvider<String>((ref) => '');
-final usernameProvider = StateProvider<String>((ref) => '');
-final emailProvider = StateProvider<String>((ref) => '');
-final passwordProvider = StateProvider<String>((ref) => '');
+final nameControllerProvider = Provider.autoDispose<TextEditingController>((
+  ref,
+) {
+  final controller = TextEditingController();
+  ref.onDispose(() => controller.dispose());
+  return controller;
+});
+
+final usernameControllerProvider = Provider.autoDispose<TextEditingController>((
+  ref,
+) {
+  final controller = TextEditingController();
+  ref.onDispose(() => controller.dispose());
+  return controller;
+});
+
+final emailControllerProvider = Provider.autoDispose<TextEditingController>((
+  ref,
+) {
+  final controller = TextEditingController();
+  ref.onDispose(() => controller.dispose());
+  return controller;
+});
+
+final passwordControllerProvider = Provider.autoDispose<TextEditingController>((
+  ref,
+) {
+  final controller = TextEditingController();
+  ref.onDispose(() => controller.dispose());
+  return controller;
+});
 final rememberMeProvider = StateProvider<bool>((ref) => false);
 final agreeToTermsProvider = StateProvider<bool>((ref) => false);
 
@@ -30,10 +59,7 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> _checkAuthStatus() async {
     final user = SupabaseService.instance.currentUser;
     if (user != null) {
-      state = AuthState(
-        status: AuthStatus.authenticated,
-        user: user,
-      );
+      state = AuthState(status: AuthStatus.authenticated, user: user);
     } else {
       state = const AuthState(status: AuthStatus.unauthenticated);
     }
@@ -64,10 +90,7 @@ class AuthNotifier extends Notifier<AuthState> {
         throw Exception('Signup failed');
       }
     } catch (e) {
-      state = AuthState(
-        status: AuthStatus.error,
-        error: e.toString(),
-      );
+      state = AuthState(status: AuthStatus.error, error: e.toString());
       log.e('Signup error: $e');
       rethrow;
     }
@@ -104,10 +127,7 @@ class AuthNotifier extends Notifier<AuthState> {
         throw Exception('Login failed');
       }
     } catch (e) {
-      state = AuthState(
-        status: AuthStatus.error,
-        error: e.toString(),
-      );
+      state = AuthState(status: AuthStatus.error, error: e.toString());
       log.e('Login error: $e');
       rethrow;
     }
@@ -118,20 +138,14 @@ class AuthNotifier extends Notifier<AuthState> {
 
     try {
       await SupabaseService.instance.signInWithGoogle();
-      
+
       final user = SupabaseService.instance.currentUser;
       if (user != null) {
-        state = AuthState(
-          status: AuthStatus.authenticated,
-          user: user,
-        );
+        state = AuthState(status: AuthStatus.authenticated, user: user);
         log.i('Google login successful');
       }
     } catch (e) {
-      state = AuthState(
-        status: AuthStatus.error,
-        error: e.toString(),
-      );
+      state = AuthState(status: AuthStatus.error, error: e.toString());
       log.e('Google login error: $e');
       rethrow;
     }
@@ -142,20 +156,14 @@ class AuthNotifier extends Notifier<AuthState> {
 
     try {
       await SupabaseService.instance.signInWithApple();
-      
+
       final user = SupabaseService.instance.currentUser;
       if (user != null) {
-        state = AuthState(
-          status: AuthStatus.authenticated,
-          user: user,
-        );
+        state = AuthState(status: AuthStatus.authenticated, user: user);
         log.i('Apple login successful');
       }
     } catch (e) {
-      state = AuthState(
-        status: AuthStatus.error,
-        error: e.toString(),
-      );
+      state = AuthState(status: AuthStatus.error, error: e.toString());
       log.e('Apple login error: $e');
       rethrow;
     }
@@ -190,10 +198,7 @@ class AuthNotifier extends Notifier<AuthState> {
       state = state.copyWith(status: AuthStatus.unauthenticated);
       log.i('Password reset email sent to: $email');
     } catch (e) {
-      state = AuthState(
-        status: AuthStatus.error,
-        error: e.toString(),
-      );
+      state = AuthState(status: AuthStatus.error, error: e.toString());
       log.e('Password reset error: $e');
       rethrow;
     }
@@ -202,12 +207,12 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> signOut() async {
     try {
       await SupabaseService.instance.signOut();
-      
+
       // Clear remember me
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('remember_me');
       await prefs.remove('user_email');
-      
+
       state = const AuthState(status: AuthStatus.unauthenticated);
       log.i('Logout successful');
     } catch (e) {
@@ -216,9 +221,6 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   void clearError() {
-    state = state.copyWith(
-      status: AuthStatus.unauthenticated,
-      error: null,
-    );
+    state = state.copyWith(status: AuthStatus.unauthenticated, error: null);
   }
 }

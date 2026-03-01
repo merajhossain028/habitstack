@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitstack/src/modules/auth/widget/auth_grad_bg.dart';
+
+import '../../../utils/extensions/extensions.dart';
+import '../../../utils/themes/themes.dart';
 import '../provider/auth_provider.dart';
 import '../provider/form_validators.dart';
 import '../widget/auth_text_field.dart';
-import '../../../utils/extensions/extensions.dart';
-import '../../../utils/themes/themes.dart';
 
 class ForgotPasswordScreen extends ConsumerWidget {
   const ForgotPasswordScreen({super.key});
@@ -14,6 +15,7 @@ class ForgotPasswordScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final formKey = GlobalKey<FormState>();
+    final emailController = ref.watch(emailControllerProvider);
     bool emailSent = false;
 
     return Scaffold(
@@ -31,9 +33,9 @@ class ForgotPasswordScreen extends ConsumerWidget {
                   padding: EdgeInsets.zero,
                   alignment: Alignment.centerLeft,
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Icon
                 Center(
                   child: Container(
@@ -50,9 +52,9 @@ class ForgotPasswordScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Title
                 Text(
                   'Forgot Password?',
@@ -61,9 +63,9 @@ class ForgotPasswordScreen extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 Text(
                   "No worries! Enter your email and we'll send you reset instructions.",
                   style: context.textTheme.bodyLarge?.copyWith(
@@ -71,25 +73,25 @@ class ForgotPasswordScreen extends ConsumerWidget {
                     height: 1.5,
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Form
                 Form(
                   key: formKey,
                   child: Column(
                     children: [
                       AuthTextField(
+                        controller: emailController,
                         label: 'Email',
                         hintText: 'sarah@example.com',
                         prefixIcon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
                         validator: FormValidators.validateEmail,
-                        onChanged: (value) => ref.read(emailProvider.notifier).state = value,
                       ),
-                      
+
                       const SizedBox(height: 32),
-                      
+
                       SizedBox(
                         width: double.infinity,
                         height: 56,
@@ -99,13 +101,19 @@ class ForgotPasswordScreen extends ConsumerWidget {
                               : () async {
                                   if (formKey.currentState!.validate()) {
                                     try {
-                                      await ref.read(authProvider.notifier)
-                                          .resetPassword(ref.read(emailProvider));
-                                      
+                                      await ref
+                                          .read(authProvider.notifier)
+                                          .resetPassword(
+                                            emailController.text.trim(),
+                                          );
                                       if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           const SnackBar(
-                                            content: Text('Reset link sent! Check your email.'),
+                                            content: Text(
+                                              'Reset link sent! Check your email.',
+                                            ),
                                             backgroundColor: Colors.green,
                                           ),
                                         );
@@ -128,7 +136,9 @@ class ForgotPasswordScreen extends ConsumerWidget {
                                   width: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : const Text(
