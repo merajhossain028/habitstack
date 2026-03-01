@@ -59,27 +59,25 @@ class SupabaseService {
     required String name,
   }) async {
     try {
-      final response = await _client.auth.signUp(
+      log.i('Attempting signup for: $email');
+
+      // Just signup - trigger auto-creates profile!
+      final authResponse = await _client.auth.signUp(
         email: email,
         password: password,
         data: {'name': name},
       );
 
-      if (response.user != null) {
-        // Create user profile in public.users table
-        await _client.from('users').insert({
-          'id': response.user!.id,
-          'email': email,
-          'name': name,
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-        });
+      if (authResponse.user == null) {
+        throw Exception('Failed to create user');
       }
 
-      log.i('User signed up: ${response.user?.email}');
-      return response;
+      // Profile created automatically by database trigger!
+      log.i('Signup successful, profile auto-created by trigger');
+
+      return authResponse;
     } catch (e) {
-      log.e('Sign up error: $e');
+      log.e('Signup error: $e');
       rethrow;
     }
   }

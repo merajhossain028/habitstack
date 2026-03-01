@@ -13,7 +13,7 @@ class ForgotPasswordScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
+    final appAuthState = ref.watch(authProvider);
     final formKey = GlobalKey<FormState>();
     final emailController = ref.watch(emailControllerProvider);
     bool emailSent = false;
@@ -96,7 +96,7 @@ class ForgotPasswordScreen extends ConsumerWidget {
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
-                          onPressed: authState.isLoading
+                          onPressed: appAuthState.isLoading
                               ? null
                               : () async {
                                   if (formKey.currentState!.validate()) {
@@ -130,7 +130,7 @@ class ForgotPasswordScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(16),
                             ),
                           ),
-                          child: authState.isLoading
+                          child: appAuthState.isLoading
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,

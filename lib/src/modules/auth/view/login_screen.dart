@@ -2,22 +2,23 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitstack/src/modules/auth/widget/auth_grad_bg.dart';
+
+import '../../../utils/extensions/extensions.dart';
+import '../../../utils/themes/themes.dart';
+import '../../entry_point/entry_point.dart';
 import '../provider/auth_provider.dart';
 import '../provider/form_validators.dart';
 import '../widget/auth_text_field.dart';
 import '../widget/social_button.dart';
-import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
-import '../../entry_point/entry_point.dart';
-import '../../../utils/extensions/extensions.dart';
-import '../../../utils/themes/themes.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
+    final appAuthState = ref.watch(authProvider);
     final passwordVisible = ref.watch(passwordVisibilityProvider);
     final rememberMe = ref.watch(rememberMeProvider);
 
@@ -49,7 +50,7 @@ class LoginScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 40),
-                
+
                 // Logo
                 Center(
                   child: Container(
@@ -64,9 +65,9 @@ class LoginScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Title
                 Center(
                   child: Text(
@@ -77,9 +78,9 @@ class LoginScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 Center(
                   child: Text(
                     'Ready to crush your habits today? 💪',
@@ -88,18 +89,18 @@ class LoginScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Form
                 _LoginForm(
                   passwordVisible: passwordVisible,
                   rememberMe: rememberMe,
-                  isLoading: authState.isLoading,
+                  isLoading: appAuthState.isLoading,
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Divider
                 Row(
                   children: [
@@ -118,9 +119,9 @@ class LoginScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Social buttons
                 Row(
                   children: [
@@ -128,9 +129,11 @@ class LoginScreen extends ConsumerWidget {
                       child: SocialButton(
                         icon: '🍎',
                         label: 'Apple',
-                        onPressed: authState.isLoading
+                        onPressed: appAuthState.isLoading
                             ? () {}
-                            : () => ref.read(authProvider.notifier).signInWithApple(),
+                            : () => ref
+                                  .read(authProvider.notifier)
+                                  .signInWithApple(),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -138,16 +141,18 @@ class LoginScreen extends ConsumerWidget {
                       child: SocialButton(
                         icon: 'G',
                         label: 'Google',
-                        onPressed: authState.isLoading
+                        onPressed: appAuthState.isLoading
                             ? () {}
-                            : () => ref.read(authProvider.notifier).signInWithGoogle(),
+                            : () => ref
+                                  .read(authProvider.notifier)
+                                  .signInWithGoogle(),
                       ),
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Demo account
                 Container(
                   padding: const EdgeInsets.all(20),
@@ -159,9 +164,7 @@ class LoginScreen extends ConsumerWidget {
                       ],
                     ),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: kPrimaryColor.withOpacity(0.3),
-                    ),
+                    border: Border.all(color: kPrimaryColor.withOpacity(0.3)),
                   ),
                   child: Column(
                     children: [
@@ -198,9 +201,11 @@ class LoginScreen extends ConsumerWidget {
                         width: double.infinity,
                         height: 48,
                         child: OutlinedButton(
-                          onPressed: authState.isLoading
+                          onPressed: appAuthState.isLoading
                               ? null
-                              : () => ref.read(authProvider.notifier).signInAsDemo(),
+                              : () => ref
+                                    .read(authProvider.notifier)
+                                    .signInAsDemo(),
                           style: OutlinedButton.styleFrom(
                             backgroundColor: const Color(0xFF1E2434),
                             side: BorderSide(
@@ -222,17 +227,15 @@ class LoginScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Signup link
                 Center(
                   child: RichText(
                     text: TextSpan(
                       text: "Don't have an account? ",
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                      ),
+                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
                       children: [
                         TextSpan(
                           text: 'Sign Up',
@@ -293,9 +296,9 @@ class _LoginForm extends ConsumerWidget {
             keyboardType: TextInputType.emailAddress,
             validator: FormValidators.validateEmailOrUsername,
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Password
           AuthTextField(
             controller: passwordController,
@@ -306,17 +309,20 @@ class _LoginForm extends ConsumerWidget {
             validator: FormValidators.validatePassword,
             suffixIcon: IconButton(
               onPressed: () {
-                ref.read(passwordVisibilityProvider.notifier).state = !passwordVisible;
+                ref.read(passwordVisibilityProvider.notifier).state =
+                    !passwordVisible;
               },
               icon: Icon(
-                passwordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                passwordVisible
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
                 color: Colors.white.withOpacity(0.5),
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Remember me & Forgot password
           Row(
             children: [
@@ -326,15 +332,11 @@ class _LoginForm extends ConsumerWidget {
                   ref.read(rememberMeProvider.notifier).state = value ?? false;
                 },
                 activeColor: kPrimaryColor,
-                side: BorderSide(
-                  color: Colors.white.withOpacity(0.3),
-                ),
+                side: BorderSide(color: Colors.white.withOpacity(0.3)),
               ),
               Text(
                 'Remember me',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
-                ),
+                style: TextStyle(color: Colors.white.withOpacity(0.7)),
               ),
               const Spacer(),
               TextButton(
@@ -351,9 +353,9 @@ class _LoginForm extends ConsumerWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Login button
           SizedBox(
             width: double.infinity,
@@ -363,7 +365,9 @@ class _LoginForm extends ConsumerWidget {
                   ? null
                   : () async {
                       if (formKey.currentState!.validate()) {
-                        await ref.read(authProvider.notifier).signIn(
+                        await ref
+                            .read(authProvider.notifier)
+                            .signIn(
                               emailOrUsername: emailController.text.trim(),
                               password: passwordController.text,
                               rememberMe: rememberMe,

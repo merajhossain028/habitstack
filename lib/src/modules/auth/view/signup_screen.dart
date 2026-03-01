@@ -17,7 +17,7 @@ class SignupScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
+    final appAuthState = ref.watch(authProvider);
     final passwordVisible = ref.watch(passwordVisibilityProvider);
     final agreeToTerms = ref.watch(agreeToTermsProvider);
 
@@ -82,7 +82,7 @@ class SignupScreen extends ConsumerWidget {
                 _SignupForm(
                   passwordVisible: passwordVisible,
                   agreeToTerms: agreeToTerms,
-                  isLoading: authState.isLoading,
+                  isLoading: appAuthState.isLoading,
                 ),
 
                 const SizedBox(height: 24),
@@ -115,7 +115,7 @@ class SignupScreen extends ConsumerWidget {
                       child: SocialButton(
                         icon: '🍎',
                         label: 'Apple',
-                        onPressed: authState.isLoading
+                        onPressed: appAuthState.isLoading
                             ? () {}
                             : () => ref
                                   .read(authProvider.notifier)
@@ -127,7 +127,7 @@ class SignupScreen extends ConsumerWidget {
                       child: SocialButton(
                         icon: 'G',
                         label: 'Google',
-                        onPressed: authState.isLoading
+                        onPressed: appAuthState.isLoading
                             ? () {}
                             : () => ref
                                   .read(authProvider.notifier)

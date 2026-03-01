@@ -2,26 +2,26 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
-class AuthState {
+class AppAuthState {
   final AuthStatus status;
   final supabase.User? user;
   final String? error;
   final bool rememberMe;
 
-  const AuthState({
+  const AppAuthState({
     required this.status,
     this.user,
     this.error,
     this.rememberMe = false,
   });
 
-  AuthState copyWith({
+  AppAuthState copyWith({
     AuthStatus? status,
     supabase.User? user,
     String? error,
     bool? rememberMe,
   }) {
-    return AuthState(
+    return AppAuthState(
       status: status ?? this.status,
       user: user ?? this.user,
       error: error ?? this.error,
