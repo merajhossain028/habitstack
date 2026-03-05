@@ -1,85 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habitstack/src/modules/entry_point/widget/custom_navbar.dart';
+import 'package:habitstack/src/modules/feed/view/feed_screen.dart';
 
-class EntryPoint extends StatefulWidget {
+// Provider for current tab index
+final currentTabProvider = StateProvider<int>((ref) => 0);
+
+class EntryPoint extends ConsumerWidget {
   const EntryPoint({super.key});
 
   @override
-  State<EntryPoint> createState() => _EntryPointState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentTab = ref.watch(currentTabProvider);
 
-class _EntryPointState extends State<EntryPoint> {
-  int _selectedIndex = 0;
+    // List of screens for each tab
+    final screens = [
+      const FeedScreen(),
+      const Center(child: Text('Search Screen')), // Placeholder
+      const Center(child: Text('Create Screen')), // Placeholder
+      const Center(child: Text('Leaderboard Screen')), // Placeholder
+      const Center(child: Text('Profile Screen')), // Placeholder
+      // const SearchScreen(),
+      // const CreateScreen(),
+      // const LeaderboardScreen(),
+      // const ProfileScreen(),
+    ];
 
-  final List<Widget> _screens = const [
-    _PlaceholderScreen(title: 'Habits'),
-    _PlaceholderScreen(title: 'Social'),
-    _PlaceholderScreen(title: 'Profile'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() => _selectedIndex = index);
+      body: IndexedStack(index: currentTab, children: screens),
+      bottomNavigationBar: CustomBottomNav(
+        currentIndex: currentTab,
+        onTap: (index) {
+          ref.read(currentTabProvider.notifier).state = index;
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.check_circle_outline),
-            selectedIcon: Icon(Icons.check_circle),
-            label: 'Habits',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.people_outline),
-            selectedIcon: Icon(Icons.people),
-            label: 'Social',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-
-  const _PlaceholderScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.construction,
-              size: 64,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '$title Screen',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Ready to build!',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ],
-        ),
       ),
     );
   }

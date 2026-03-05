@@ -15,7 +15,7 @@ class CustomBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 80,
+      height: 70,
       decoration: BoxDecoration(
         color: const Color(0xFF1A1F2E),
         boxShadow: [
@@ -27,28 +27,21 @@ class CustomBottomNav extends StatelessWidget {
         ],
       ),
       child: SafeArea(
+        top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(index: 0, icon: Icons.home_rounded, label: 'Home'),
-              _buildNavItem(
-                index: 1,
-                icon: Icons.search_rounded,
-                label: 'Search',
-              ),
+              _buildNavItem(index: 0, icon: Icons.home_rounded, label: ''),
+              _buildNavItem(index: 1, icon: Icons.search_rounded, label: ''),
               _buildCenterButton(),
               _buildNavItem(
                 index: 3,
                 icon: Icons.emoji_events_rounded,
-                label: 'Leaderboard',
+                label: '',
               ),
-              _buildNavItem(
-                index: 4,
-                icon: Icons.person_rounded,
-                label: 'Profile',
-              ),
+              _buildNavItem(index: 4, icon: Icons.person_rounded, label: ''),
             ],
           ),
         ),
@@ -67,27 +60,11 @@ class CustomBottomNav extends StatelessWidget {
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? kPrimaryColor : Colors.white.withOpacity(0.5),
-              size: 28,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected
-                    ? kPrimaryColor
-                    : Colors.white.withOpacity(0.5),
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              ),
-            ),
-          ],
+        padding: const EdgeInsets.all(8),
+        child: Icon(
+          icon,
+          color: isSelected ? kPrimaryColor : Colors.white.withOpacity(0.5),
+          size: 26,
         ),
       ),
     );
@@ -97,8 +74,8 @@ class CustomBottomNav extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap(2),
       child: Container(
-        width: 56,
-        height: 56,
+        width: 50,
+        height: 50,
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [kPrimaryColor, kSecondaryColor],
@@ -114,7 +91,7 @@ class CustomBottomNav extends StatelessWidget {
             ),
           ],
         ),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
       ),
     );
   }
