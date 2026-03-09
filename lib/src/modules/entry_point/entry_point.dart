@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habitstack/src/modules/create/view/create_screen.dart';
 import 'package:habitstack/src/modules/entry_point/widget/custom_navbar.dart';
 import 'package:habitstack/src/modules/feed/view/feed_screen.dart';
 
@@ -17,11 +18,10 @@ class EntryPoint extends ConsumerWidget {
     final screens = [
       const FeedScreen(),
       const Center(child: Text('Search Screen')), // Placeholder
-      const Center(child: Text('Create Screen')), // Placeholder
+      const CreateScreen(),
       const Center(child: Text('Leaderboard Screen')), // Placeholder
       const Center(child: Text('Profile Screen')), // Placeholder
       // const SearchScreen(),
-      // const CreateScreen(),
       // const LeaderboardScreen(),
       // const ProfileScreen(),
     ];
