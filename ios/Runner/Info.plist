@@ -49,6 +49,15 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<key>NSCameraUsageDescription</key>
+	<string>HabitStack needs camera access to capture your habit photos</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>HabitStack needs photo library access to select images</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>HabitStack may need microphone access for video capture</string>
+
+
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
