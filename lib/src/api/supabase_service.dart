@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -519,22 +520,7 @@ class SupabaseService {
     }
   }
 
-  /// Create post
-  Future<Map<String, dynamic>> createPost(Map<String, dynamic> postData) async {
-    try {
-      final response = await _client
-          .from('posts')
-          .insert(postData)
-          .select()
-          .single();
-
-      log.i('Post created: ${response['id']}');
-      return response;
-    } catch (e) {
-      log.e('Create post error: $e');
-      rethrow;
-    }
-  }
+ 
 
   /// Toggle like
   Future<void> toggleLike({
@@ -668,5 +654,123 @@ class SupabaseService {
   Future<void> unsubscribe(RealtimeChannel channel) async {
     await _client.removeChannel(channel);
     log.i('Unsubscribed from channel');
+  }
+
+  Future<String?> uploadImage({
+    required File imageFile,
+    required String bucket,
+    required String path,
+  }) async {
+    try {
+      final bytes = await imageFile.readAsBytes();
+      final fileExt = imageFile.path.split('.').last;
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+      final filePath = '$path/$fileName';
+
+      await _client.storage
+          .from(bucket)
+          .uploadBinary(
+            filePath,
+            bytes,
+            fileOptions: FileOptions(
+              contentType: 'image/$fileExt',
+              upsert: false,
+            ),
+          );
+
+      // Get public URL
+      final imageUrl = _client.storage.from(bucket).getPublicUrl(filePath);
+
+      log.i('Image uploaded successfully: $imageUrl');
+      return imageUrl;
+    } catch (e) {
+      log.e('Image upload error: $e');
+      return null;
+    }
+  }
+
+  // Create habit completion with post
+  Future<Map<String, dynamic>?> createHabitCompletion({
+    required String habitId,
+    required String photoUrl,
+    String? note,
+    String? location,
+  }) async {
+    try {
+      final userId = currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      // 1. Create completion
+      final completionResponse = await _client
+          .from('completions')
+          .insert({
+            'habit_id': habitId,
+            'user_id': userId,
+            'photo_url': photoUrl,
+            'note': note,
+            'location': location,
+            'completed_at': DateTime.now().toIso8601String(),
+          })
+          .select()
+          .single();
+
+      log.i('Completion created: ${completionResponse['id']}');
+
+      // 2. Update habit stats (trigger handles this automatically)
+
+      return completionResponse;
+    } catch (e) {
+      log.e('Create completion error: $e');
+      return null;
+    }
+  }
+
+  // Create post
+  Future<Map<String, dynamic>?> createPost({
+    required String habitId,
+    required String? completionId,
+    required String photoUrl,
+    required String content,
+    required bool isPublic,
+  }) async {
+    try {
+      final userId = currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final postResponse = await _client
+          .from('posts')
+          .insert({
+            'user_id': userId,
+            'habit_id': habitId,
+            'completion_id': completionId,
+            'content': content,
+            'photo_url': photoUrl,
+            'is_public': isPublic,
+            'created_at': DateTime.now().toIso8601String(),
+          })
+          .select()
+          .single();
+
+      log.i('Post created: ${postResponse['id']}');
+      return postResponse;
+    } catch (e) {
+      log.e('Create post error: $e');
+      return null;
+    }
+  }
+
+  // ✅ Delete image from storage
+  Future<bool> deleteImage({
+    required String bucket,
+    required String path,
+  }) async {
+    try {
+      await _client.storage.from(bucket).remove([path]);
+      log.i('Image deleted: $path');
+      return true;
+    } catch (e) {
+      log.e('Delete image error: $e');
+      return false;
+    }
   }
 }
