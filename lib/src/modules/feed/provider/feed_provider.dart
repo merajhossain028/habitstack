@@ -1,16 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../api/supabase_service.dart';
 import '../../../utils/logger/logger_helper.dart';
 
 // Feed State
 class FeedState {
   final List<Map<String, dynamic>> posts;
+  final Set<String> likedPostIds;
   final bool isLoading;
   final bool isRefreshing;
   final String? error;
 
   const FeedState({
     this.posts = const [],
+    this.likedPostIds = const {},
     this.isLoading = false,
     this.isRefreshing = false,
     this.error,
@@ -18,12 +21,14 @@ class FeedState {
 
   FeedState copyWith({
     List<Map<String, dynamic>>? posts,
+    Set<String>? likedPostIds,
     bool? isLoading,
     bool? isRefreshing,
     String? error,
   }) {
     return FeedState(
       posts: posts ?? this.posts,
+      likedPostIds: likedPostIds ?? this.likedPostIds,
       isLoading: isLoading ?? this.isLoading,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       error: error,
@@ -38,7 +43,6 @@ final feedProvider = StateNotifierProvider<FeedNotifier, FeedState>(
 
 class FeedNotifier extends StateNotifier<FeedState> {
   FeedNotifier() : super(const FeedState()) {
-    // Fetch posts when provider is initialized
     fetchPosts();
   }
 
@@ -49,7 +53,7 @@ class FeedNotifier extends StateNotifier<FeedState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // Query posts with user and habit data
+      // Fetch posts
       final response = await _supabase.client
           .from('posts')
           .select('''
@@ -69,10 +73,15 @@ class FeedNotifier extends StateNotifier<FeedState> {
           .order('created_at', ascending: false)
           .limit(20);
 
+      // Fetch user's liked posts
+      final likedPostIds = await _supabase.getUserLikedPosts();
+
       log.i('Feed posts fetched: ${response.length} posts');
+      log.i('User has liked: ${likedPostIds.length} posts');
 
       state = state.copyWith(
         posts: List<Map<String, dynamic>>.from(response),
+        likedPostIds: likedPostIds, // ✅ ADD THIS
         isLoading: false,
       );
     } catch (e) {
@@ -108,10 +117,14 @@ class FeedNotifier extends StateNotifier<FeedState> {
           .order('created_at', ascending: false)
           .limit(20);
 
+      // Fetch user's liked posts
+      final likedPostIds = await _supabase.getUserLikedPosts();
+
       log.i('Feed refreshed: ${response.length} posts');
 
       state = state.copyWith(
         posts: List<Map<String, dynamic>>.from(response),
+        likedPostIds: likedPostIds,
         isRefreshing: false,
       );
     } catch (e) {
@@ -123,9 +136,67 @@ class FeedNotifier extends StateNotifier<FeedState> {
     }
   }
 
-  // Toggle like (placeholder - will implement fully later)
-  void toggleLike(String postId) {
-    // TODO: Implement like/unlike logic
-    log.i('Like toggled for post: $postId');
+  // Toggle like
+  Future<void> toggleLike(String postId) async {
+    final isLiked = state.likedPostIds.contains(postId);
+
+    // Optimistic update - update UI immediately
+    final updatedLikedIds = Set<String>.from(state.likedPostIds);
+    final updatedPosts = state.posts.map((post) {
+      if (post['id'] == postId) {
+        final currentLikes = post['likes_count'] as int;
+        return {
+          ...post,
+          'likes_count': isLiked ? currentLikes - 1 : currentLikes + 1,
+        };
+      }
+      return post;
+    }).toList();
+
+    if (isLiked) {
+      updatedLikedIds.remove(postId);
+    } else {
+      updatedLikedIds.add(postId);
+    }
+
+    // Update state optimistically
+    state = state.copyWith(posts: updatedPosts, likedPostIds: updatedLikedIds);
+
+    // Perform actual database operation
+    try {
+      if (isLiked) {
+        await _supabase.unlikePost(postId);
+        log.i('Unliked post: $postId');
+      } else {
+        await _supabase.likePost(postId);
+        log.i('Liked post: $postId');
+      }
+    } catch (e) {
+      log.e('Toggle like error: $e');
+
+      // Revert optimistic update on error
+      final revertedLikedIds = Set<String>.from(state.likedPostIds);
+      final revertedPosts = state.posts.map((post) {
+        if (post['id'] == postId) {
+          final currentLikes = post['likes_count'] as int;
+          return {
+            ...post,
+            'likes_count': isLiked ? currentLikes + 1 : currentLikes - 1,
+          };
+        }
+        return post;
+      }).toList();
+
+      if (isLiked) {
+        revertedLikedIds.add(postId);
+      } else {
+        revertedLikedIds.remove(postId);
+      }
+
+      state = state.copyWith(
+        posts: revertedPosts,
+        likedPostIds: revertedLikedIds,
+      );
+    }
   }
 }

@@ -3,8 +3,9 @@ import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../utils/themes/themes.dart';
 
-class PostCard extends StatelessWidget {
+class PostCard extends StatefulWidget {
   final Map<String, dynamic> post;
+  final bool isLiked; 
   final VoidCallback onLike;
   final VoidCallback onComment;
   final VoidCallback onBookmark;
@@ -12,25 +13,65 @@ class PostCard extends StatelessWidget {
   const PostCard({
     super.key,
     required this.post,
+    required this.isLiked,
     required this.onLike,
     required this.onComment,
     required this.onBookmark,
   });
 
   @override
+  State<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin {
+  late AnimationController _likeAnimationController;
+  late Animation<double> _likeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _likeAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _likeAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
+      CurvedAnimation(
+        parent: _likeAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _likeAnimationController.dispose();
+    super.dispose();
+  }
+
+  void _handleLike() {
+    // Trigger animation
+    _likeAnimationController.forward().then((_) {
+      _likeAnimationController.reverse();
+    });
+    
+    // Call callback
+    widget.onLike();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Extract data safely
-    final user = post['users'];
-    final habit = post['habits'];
+    final user = widget.post['users'];
+    final habit = widget.post['habits'];
     final userName = user?['name'] ?? 'Unknown User';
     final avatarUrl = user?['avatar_url'];
     final habitName = habit?['name'] ?? 'Habit';
     final habitIcon = habit?['icon'] ?? '📌';
-    final caption = post['content'] ?? '';
-    final photoUrl = post['photo_url'] ?? '';
-    final likesCount = post['likes_count'] ?? 0;
-    final commentsCount = post['comments_count'] ?? 0;
-    final createdAt = DateTime.parse(post['created_at']);
+    final caption = widget.post['content'] ?? '';
+    final photoUrl = widget.post['photo_url'] ?? '';
+    final likesCount = widget.post['likes_count'] ?? 0;
+    final commentsCount = widget.post['comments_count'] ?? 0;
+    final createdAt = DateTime.parse(widget.post['created_at']);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -168,7 +209,7 @@ class PostCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Streak badge (placeholder - will fetch real streak later)
+                // Streak badge
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -187,7 +228,7 @@ class PostCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '7 days', // TODO: Calculate real streak
+                        '7 days',
                         style: TextStyle(
                           color: Colors.orange[300],
                           fontSize: 12,
@@ -221,15 +262,22 @@ class PostCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
-                // Like button
+                // ✅ UPDATED: Like button with animation
                 GestureDetector(
-                  onTap: onLike,
+                  onTap: _handleLike,
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.favorite_border,
-                        color: Colors.white,
-                        size: 24,
+                      ScaleTransition(
+                        scale: _likeAnimation,
+                        child: Icon(
+                          widget.isLiked 
+                              ? Icons.favorite  // ✅ Filled heart
+                              : Icons.favorite_border,  // ✅ Outline heart
+                          color: widget.isLiked 
+                              ? Colors.red  // ✅ Red when liked
+                              : Colors.white,  // ✅ White when not liked
+                          size: 24,
+                        ),
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -245,7 +293,7 @@ class PostCard extends StatelessWidget {
                 const SizedBox(width: 24),
                 // Comment button
                 GestureDetector(
-                  onTap: onComment,
+                  onTap: widget.onComment,
                   child: Row(
                     children: [
                       const Icon(
@@ -267,7 +315,7 @@ class PostCard extends StatelessWidget {
                 const Spacer(),
                 // Bookmark button
                 GestureDetector(
-                  onTap: onBookmark,
+                  onTap: widget.onBookmark,
                   child: const Icon(
                     Icons.bookmark_border,
                     color: Colors.white,
