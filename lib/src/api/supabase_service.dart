@@ -520,8 +520,6 @@ class SupabaseService {
     }
   }
 
- 
-
   /// Toggle like
   Future<void> toggleLike({
     required String userId,
@@ -725,7 +723,7 @@ class SupabaseService {
     }
   }
 
-  // Create post
+  /// Create post
   Future<Map<String, dynamic>?> createPost({
     required String habitId,
     required String? completionId,
@@ -759,7 +757,7 @@ class SupabaseService {
     }
   }
 
-  // ✅ Delete image from storage
+  /// Delete image from storage
   Future<bool> deleteImage({
     required String bucket,
     required String path,
@@ -771,6 +769,96 @@ class SupabaseService {
     } catch (e) {
       log.e('Delete image error: $e');
       return false;
+    }
+  }
+
+  /// Like a post
+  Future<bool> likePost(String postId) async {
+    try {
+      final userId = currentUser?.id;
+      if (userId == null) {
+        log.e('User not authenticated');
+        return false;
+      }
+
+      // Insert like
+      await _client.from('likes').insert({
+        'post_id': postId,
+        'user_id': userId,
+      });
+
+      log.i('Post liked: $postId');
+      return true;
+    } catch (e) {
+      log.e('Like post error: $e');
+      return false;
+    }
+  }
+
+  /// Unlike a post
+  Future<bool> unlikePost(String postId) async {
+    try {
+      final userId = currentUser?.id;
+      if (userId == null) {
+        log.e('User not authenticated');
+        return false;
+      }
+
+      // Delete like
+      await _client
+          .from('likes')
+          .delete()
+          .eq('post_id', postId)
+          .eq('user_id', userId);
+
+      log.i('Post unliked: $postId');
+      return true;
+    } catch (e) {
+      log.e('Unlike post error: $e');
+      return false;
+    }
+  }
+
+  /// Check if user has liked a post
+  Future<bool> hasUserLikedPost(String postId) async {
+    try {
+      final userId = currentUser?.id;
+      if (userId == null) return false;
+
+      final response = await _client
+          .from('likes')
+          .select('id')
+          .eq('post_id', postId)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      return response != null;
+    } catch (e) {
+      log.e('Check like status error: $e');
+      return false;
+    }
+  }
+
+  /// Get user's liked post IDs
+  Future<Set<String>> getUserLikedPosts() async {
+    try {
+      final userId = currentUser?.id;
+      if (userId == null) return {};
+
+      final response = await _client
+          .from('likes')
+          .select('post_id')
+          .eq('user_id', userId);
+
+      final likedPostIds = <String>{};
+      for (final like in response) {
+        likedPostIds.add(like['post_id'] as String);
+      }
+
+      return likedPostIds;
+    } catch (e) {
+      log.e('Get liked posts error: $e');
+      return {};
     }
   }
 }

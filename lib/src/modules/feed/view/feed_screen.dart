@@ -153,6 +153,7 @@ class FeedScreen extends ConsumerWidget {
                     final post = feedState.posts[index];
                     return PostCard(
                       post: post,
+                      isLiked: feedState.likedPostIds.contains(post['id']),
                       onLike: () {
                         ref.read(feedProvider.notifier).toggleLike(post['id']);
                       },
