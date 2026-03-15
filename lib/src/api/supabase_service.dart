@@ -559,45 +559,73 @@ class SupabaseService {
     }
   }
 
-  /// Get post comments
+  /// Fetch comments for a post
   Future<List<Map<String, dynamic>>> getComments(String postId) async {
     try {
       final response = await _client
           .from('comments')
-          .select('*, user:users(*)')
+          .select('''
+          *,
+          users:user_id (
+            id,
+            name,
+            avatar_url
+          )
+        ''')
           .eq('post_id', postId)
           .order('created_at', ascending: true);
 
-      return response;
+      log.i('Fetched ${response.length} comments for post $postId');
+      return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      log.e('Get comments error: $e');
-      rethrow;
+      log.e('Fetch comments error: $e');
+      return [];
     }
   }
 
-  /// Add comment
-  Future<Map<String, dynamic>> addComment({
-    required String postId,
-    required String userId,
-    required String content,
-  }) async {
+  /// Add a comment to a post
+  Future<Map<String, dynamic>?> addComment(
+    String postId,
+    String content,
+  ) async {
     try {
+      final userId = currentUser?.id;
+      if (userId == null) {
+        log.e('User not authenticated');
+        return null;
+      }
+
       final response = await _client
           .from('comments')
-          .insert({
-            'post_id': postId,
-            'user_id': userId,
-            'content': content,
-            'created_at': DateTime.now().toIso8601String(),
-          })
-          .select()
+          .insert({'post_id': postId, 'user_id': userId, 'content': content})
+          .select('''
+          *,
+          users:user_id (
+            id,
+            name,
+            avatar_url
+          )
+        ''')
           .single();
 
-      log.i('Comment added');
+      log.i('Comment added to post $postId');
       return response;
     } catch (e) {
       log.e('Add comment error: $e');
-      rethrow;
+      return null;
+    }
+  }
+
+  /// Delete a comment
+  Future<bool> deleteComment(String commentId) async {
+    try {
+      await _client.from('comments').delete().eq('id', commentId);
+
+      log.i('Comment deleted: $commentId');
+      return true;
+    } catch (e) {
+      log.e('Delete comment error: $e');
+      return false;
     }
   }
 
