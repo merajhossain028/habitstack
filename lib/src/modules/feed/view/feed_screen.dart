@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habitstack/src/modules/feed/widget/comment_sheet.dart';
 
 import '../../../utils/themes/themes.dart';
 import '../provider/feed_provider.dart';
@@ -158,7 +159,13 @@ class FeedScreen extends ConsumerWidget {
                         ref.read(feedProvider.notifier).toggleLike(post['id']);
                       },
                       onComment: () {
-                        // TODO: Open comments sheet
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) =>
+                              CommentsSheet(postId: post['id']),
+                        );
                       },
                       onBookmark: () {
                         // TODO: Bookmark post
