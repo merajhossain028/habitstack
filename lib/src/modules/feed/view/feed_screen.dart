@@ -167,9 +167,6 @@ class FeedScreen extends ConsumerWidget {
                               CommentsSheet(postId: post['id']),
                         );
                       },
-                      onBookmark: () {
-                        // TODO: Bookmark post
-                      },
                     );
                   }, childCount: feedState.posts.length),
                 ),
