@@ -1,5 +1,6 @@
 import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:habitstack/src/modules/feed/view/post_details_screen.dart';
 import 'package:habitstack/src/utils/share/share_helper.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -143,33 +144,51 @@ class _PostCardState extends State<PostCard>
             ),
           ),
 
-          // Photo
+          // Photo - tap to view detail
           if (photoUrl.isNotEmpty)
-            AspectRatio(
-              aspectRatio: 1,
-              child: FastCachedImage(
-                url: photoUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, exception, stackTrace) {
-                  return Container(
-                    color: const Color(0xFF2D3446),
-                    child: const Center(
-                      child: Icon(
-                        Icons.broken_image,
-                        color: Colors.white30,
-                        size: 48,
-                      ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PostDetailScreen(
+                      post: widget.post,
+                      isLiked: widget.isLiked,
                     ),
-                  );
-                },
-                loadingBuilder: (context, progress) {
-                  return Container(
-                    color: const Color(0xFF2D3446),
-                    child: const Center(
-                      child: CircularProgressIndicator(color: kPrimaryColor),
-                    ),
-                  );
-                },
+                  ),
+                );
+              },
+              child: Hero(
+                tag: 'post-${widget.post['id']}',
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: FastCachedImage(
+                    url: photoUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, exception, stackTrace) {
+                      return Container(
+                        color: const Color(0xFF2D3446),
+                        child: const Center(
+                          child: Icon(
+                            Icons.broken_image,
+                            color: Colors.white30,
+                            size: 48,
+                          ),
+                        ),
+                      );
+                    },
+                    loadingBuilder: (context, progress) {
+                      return Container(
+                        color: const Color(0xFF2D3446),
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: kPrimaryColor,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
 
