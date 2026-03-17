@@ -1,14 +1,15 @@
-import 'package:flutter/material.dart';
 import 'package:fast_cached_network_image/fast_cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:habitstack/src/utils/share/share_helper.dart';
 import 'package:timeago/timeago.dart' as timeago;
+
 import '../../../utils/themes/themes.dart';
 
 class PostCard extends StatefulWidget {
   final Map<String, dynamic> post;
-  final bool isLiked; 
+  final bool isLiked;
   final VoidCallback onLike;
   final VoidCallback onComment;
-  final VoidCallback onBookmark;
 
   const PostCard({
     super.key,
@@ -16,14 +17,14 @@ class PostCard extends StatefulWidget {
     required this.isLiked,
     required this.onLike,
     required this.onComment,
-    required this.onBookmark,
   });
 
   @override
   State<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin {
+class _PostCardState extends State<PostCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _likeAnimationController;
   late Animation<double> _likeAnimation;
 
@@ -53,7 +54,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
     _likeAnimationController.forward().then((_) {
       _likeAnimationController.reverse();
     });
-    
+
     // Call callback
     widget.onLike();
   }
@@ -165,9 +166,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   return Container(
                     color: const Color(0xFF2D3446),
                     child: const Center(
-                      child: CircularProgressIndicator(
-                        color: kPrimaryColor,
-                      ),
+                      child: CircularProgressIndicator(color: kPrimaryColor),
                     ),
                   );
                 },
@@ -192,10 +191,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        habitIcon,
-                        style: const TextStyle(fontSize: 14),
-                      ),
+                      Text(habitIcon, style: const TextStyle(fontSize: 14)),
                       const SizedBox(width: 6),
                       Text(
                         habitName,
@@ -222,10 +218,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
-                        '🔥',
-                        style: TextStyle(fontSize: 14),
-                      ),
+                      const Text('🔥', style: TextStyle(fontSize: 14)),
                       const SizedBox(width: 4),
                       Text(
                         '7 days',
@@ -248,10 +241,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
                 caption,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
             ),
 
@@ -270,12 +260,14 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                       ScaleTransition(
                         scale: _likeAnimation,
                         child: Icon(
-                          widget.isLiked 
-                              ? Icons.favorite  // ✅ Filled heart
-                              : Icons.favorite_border,  // ✅ Outline heart
-                          color: widget.isLiked 
-                              ? Colors.red  // ✅ Red when liked
-                              : Colors.white,  // ✅ White when not liked
+                          widget.isLiked
+                              ? Icons
+                                    .favorite // ✅ Filled heart
+                              : Icons.favorite_border, // ✅ Outline heart
+                          color: widget.isLiked
+                              ? Colors
+                                    .red // ✅ Red when liked
+                              : Colors.white, // ✅ White when not liked
                           size: 24,
                         ),
                       ),
@@ -313,11 +305,25 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   ),
                 ),
                 const Spacer(),
-                // Bookmark button
+                // Share button
                 GestureDetector(
-                  onTap: widget.onBookmark,
+                  onTap: () {
+                    // Extract habit info for sharing
+                    final habitName = habit?['name'] ?? 'Habit';
+                    final habitIcon = habit?['icon'] ?? '📌';
+                    final streakDays = 7; // TODO: Get actual streak from data
+
+                    ShareHelper.sharePost(
+                      habitName: habitName,
+                      habitIcon: habitIcon,
+                      userName: userName,
+                      streakDays: streakDays,
+                      caption: caption.isNotEmpty ? caption : null,
+                      photoUrl: photoUrl.isNotEmpty ? photoUrl : null,
+                    );
+                  },
                   child: const Icon(
-                    Icons.bookmark_border,
+                    Icons.share_outlined,
                     color: Colors.white,
                     size: 24,
                   ),
